@@ -1,8 +1,8 @@
-from pydantic import BaseModel
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime
 
 class AppointmentBase(BaseModel):
-    date: str
+    date: datetime
     barber_id: int
     client_id: int
     payment_method: str

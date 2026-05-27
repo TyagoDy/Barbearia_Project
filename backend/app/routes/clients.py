@@ -1,18 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.database import get_db
 from app.schemas.client import ClientCreate
 from app import models
 from app.services import client_service
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.get("/clients")
 def get_clients(db: Session = Depends(get_db)):

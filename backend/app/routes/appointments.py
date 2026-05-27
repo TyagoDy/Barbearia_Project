@@ -1,18 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.database import get_db
 from app.schemas.appointments import AppointmentCreate
 from app import models
 from app.services import appointment_service
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.get("/appointments")
 def get_appointments(db: Session = Depends(get_db)):
@@ -20,7 +13,15 @@ def get_appointments(db: Session = Depends(get_db)):
 
 @router.post("/appointments")
 def create_appointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
-    return appointment_service.create_appointment(db, appointment)
+    try:
+        return appointment_service.create_appointment(db, appointment)
+    except ValueError as e:
+        err_msg = str(e)
+        if "not found" in err_msg:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err_msg)
+        if "already booked" in err_msg:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=err_msg)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=err_msg)
 
 @router.delete("/appointments/{appointment_id}")
 def delete_appointment(appointment_id: int, db: Session = Depends(get_db)):
