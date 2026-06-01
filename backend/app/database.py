@@ -2,9 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 import os
 
-User_db = os.getenv("DATABASE_URL", "sqlite:///./barbearia.db")
+database_url = os.getenv("DATABASE_URL", "sqlite:///./barbearia.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(User_db)
+engine = create_engine(database_url)
 
 SessionLocal = sessionmaker(bind=engine)
 

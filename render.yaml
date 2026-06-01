@@ -1,12 +1,23 @@
+databases:
+  - name: barbearia-db
+    plan: free
+    databaseName: barbearia_db
+    user: barbearia
+
 services:
   - type: web
     name: barbearia-api
     runtime: python
+    plan: free
+    branch: develop
     rootDir: backend
     buildCommand: pip install uv && uv sync --frozen
     startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: barbearia-db
+          property: connectionString
       - key: CORS_ORIGINS
         sync: false
